@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - LinkVault</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .admin-sidebar {
+            width: 260px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            padding: 24px 0;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .admin-sidebar .logo {
+            padding: 0 24px 24px;
+            display: block;
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--text-primary);
+            text-decoration: none;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+
+        .admin-sidebar a {
+            display: block;
+            padding: 14px 24px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border-left: 4px solid transparent;
+        }
+
+        .admin-sidebar a:hover,
+        .admin-sidebar a.active {
+            color: var(--accent);
+            background: rgba(0, 229, 255, 0.05);
+            border-left-color: var(--accent);
+        }
+
+        .admin-main {
+            flex: 1;
+            padding: 40px;
+            overflow-x: auto;
+            background: var(--bg-primary);
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 20px;
+        }
+
+        .admin-header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .admin-logout {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 10px 22px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .admin-logout:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+            background: rgba(255, 61, 0, 0.05);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--accent);
+        }
+
+        .stat-card.banned-card::before {
+            background: var(--danger);
+        }
+
+        .stat-card .stat-num {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--accent);
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .stat-card.banned-card .stat-num {
+            color: var(--danger);
+        }
+
+        .stat-card .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .table-container {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .admin-table th {
+            padding: 16px 24px;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(22, 27, 38, 0.6);
+        }
+
+        .admin-table td {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.95rem;
+            color: var(--text-primary);
+        }
+
+        .admin-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .admin-table td .title-cell {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .admin-table .actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-danger { background: var(--danger); color: #fff; }
+        .btn-danger:hover { filter: brightness(1.2); }
+        .btn-warning { background: var(--warning); color: #000; }
+        .btn-warning:hover { filter: brightness(1.2); }
+        .btn-success { background: var(--success); color: #000; }
+        .btn-success:hover { filter: brightness(1.2); }
+
+        .section-tab h2 {
+            font-size: 1.4rem;
+            margin-bottom: 24px;
+            color: var(--text-primary);
+        }
+
+        .add-category-form {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+            background: var(--bg-secondary);
+            padding: 24px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .add-category-form input, .login-box input, .modal input {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .add-category-form input:focus, .login-box input:focus, .modal input:focus {
+            border-color: var(--accent);
+        }
+
+        .add-category-form input { flex: 1; }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #000;
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 0 16px rgba(0, 229, 255, 0.4);
+            filter: brightness(1.1);
+        }
+
+        .btn-full { width: 100%; }
+
+        .cat-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+        }
+
+        .cat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            padding: 16px 24px;
+            border-radius: 10px;
+        }
+
+        .cat-item .cat-info strong {
+            display: block;
+            font-size: 1.05rem;
+            color: var(--text-primary);
+        }
+
+        .cat-item .cat-info .count {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .login-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: var(--bg-primary);
+        }
+
+        .login-box {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 40px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .login-box h1 {
+            text-align: center;
+            margin-bottom: 32px;
+            font-size: 1.8rem;
+            color: var(--text-primary);
+            letter-spacing: 0.5px;
+        }
+
+        .login-box input {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .login-error {
+            color: var(--danger);
+            font-size: 0.9rem;
+            text-align: center;
+            margin-top: 16px;
+            display: none;
+            font-weight: 600;
+        }
+
+        /* Modal / Change Password view optimization */
+        .modal-overlay {
+            position: fixed;
+            top:0; left:0; right:0; bottom:0;
+            background: rgba(11, 15, 25, 0.85);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            width: 100%;
+            max-width: 480px;
+        }
+
+        .modal h2 { margin-bottom: 16px; color: var(--text-primary); }
+        .modal label { display: block; margin: 12px 0 6px; font-size: 0.85rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;}
+        .modal input { width: 100%; }
+
+        .admin-hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <!-- Password Requirement Enforcement Screen -->
+    <div id="changePasswordModal" class="modal-overlay" style="display:none;">
+        <div class="modal">
+            <h2>⚠️ Action Required</h2>
+            <div style="background: rgba(255, 61, 0, 0.1); padding: 16px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid var(--danger); font-size: 0.9rem; color: var(--text-primary);">
+                <strong style="color: var(--danger);">Security Lockout Rule:</strong> You are flagged to reset your system credentials before executing database updates[cite: 12].
+            </div>
+            <form id="changePasswordForm">
+                <label>Current Password *</label>
+                <input type="password" id="currentPassword" required>
+                
+                <label>New Secure Password *</label>
+                <input type="password" id="newPassword" required>
+                <small style="color: var(--text-muted); display:block; margin-top:6px;">Minimum 12 characters containing uppercase, lowercase, numeric, and symbols[cite: 12].</small>
+                
+                <label>Confirm New Password *</label>
+                <input type="password" id="confirmPassword" required>
+                
+                <div style="color: var(--danger); font-size: 0.85rem; margin: 12px 0; display: none; font-weight: 600;" id="passError"></div>
+                
+                <button type="submit" class="btn-primary btn-full" style="margin-top: 16px;">Update System Access</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Security Login Interface -->
+    <div id="loginView" class="login-container">
+        <div class="login-box">
+            <h1>Admin Control</h1>
+            <input type="text" id="loginUser" placeholder="Username" autocomplete="off">
+            <input type="password" id="loginPass" placeholder="Password">
+            <button class="btn-primary btn-full" id="loginBtn">Authenticate</button>
+            <div class="login-error" id="loginError"></div>
+        </div>
+    </div>
+
+    <!-- Dashboard Shell View Layout -->
+    <div id="adminView" class="admin-layout admin-hidden">
+        <nav class="admin-sidebar">
+            <a href="/" class="logo">LinkVault</a>
+            <a href="#" class="active" data-tab="links">Links Stream</a>
+            <a href="#" data-tab="categories">Categories DB</a>
+        </nav>
+        <main class="admin-main">
+            <div class="admin-header">
+                <h1>Secure Server Terminal</h1>
+                <button class="admin-logout" id="logoutBtn">Terminate Session</button>
+            </div>
+
+            <!-- Real-time Stats Hydrated From Data Engine -->
+            <div class="stats-grid" id="statsGrid"></div>
+
+            <!-- Tab Content: Links Execution Module -->
+            <div id="tabLinks" class="tab-content">
+                <div class="section-tab">
+                    <h2>Active Data Indexes</h2>
+                </div>
+                <div class="table-container">
+                    <table class="admin-table" id="linksTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 80px;">Index</th>
+                                <th>Anchor Title</th>
+                                <th>Target Route Address</th>
+                                <th>Namespace Group</th>
+                                <th>Timestamp</th>
+                                <th style="width: 100px;">Metric Log</th>
+                                <th style="width: 180px; text-align: right;">Operations</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab Content: Categories Control -->
+            <div id="tabCategories" class="tab-content" style="display:none">
+                <div class="section-tab">
+                    <h2>Category Control Unit</h2>
+                    <div class="add-category-form">
+                        <input type="text" id="newCatName" placeholder="Define new unique category label...">
+                        <button class="btn-primary" id="addCatBtn">Commit Category</button>
+                    </div>
+                    <div class="cat-list" id="catList"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Script Execution Logic remains perfectly integrated -->
+    <script>
+        const ADMIN_USERNAME = 'admin';
+        let isLoggedIn = false;
+        let passwordChangeRequired = false;
+
+        async function api(path, options = {}) {
+            try {
+                const res = await fetch(path, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    ...options
+                });
+                if (res.status === 401 && isLoggedIn) {
+                    isLoggedIn = false;
+                    showLogin();
+                    return { error: 'Unauthorized' };
+                }
+                return await res.json();
+            } catch (err) {
+                console.error('API error:', err);
+                return { error: 'Connection failed - is the server running?' };
+            }
+        }
+
+        function showLogin() {
+            document.getElementById('loginView').style.display = 'flex';
+            document.getElementById('adminView').classList.add('admin-hidden');
+            document.getElementById('changePasswordModal').style.display = 'none';
+        }
+
+        function showAdmin() {
+            document.getElementById('loginView').style.display = 'none';
+            document.getElementById('adminView').classList.remove('admin-hidden');
+        }
+
+        function showPasswordChange() {
+            document.getElementById('changePasswordModal').style.display = 'flex';
+            document.getElementById('adminView').classList.add('admin-hidden');
+        }
+
+        async function checkAuth() {
+            const res = await api('/api/admin/me');
+            if (res.username) {
+                isLoggedIn = true;
+                passwordChangeRequired = res.passwordChangeRequired || false;
+                
+                if (passwordChangeRequired) {
+                    showPasswordChange();
+                } else {
+                    showAdmin();
+                    loadDashboard();
+                }
+            } else if (res.error === 'Connection failed - is the server running?') {
+                document.getElementById('loginError').textContent = '🔌 Server not running. Start with: npm start';
+                document.getElementById('loginError').style.display = 'block';
+            }
+        }
+
+        async function loadDashboard() {
+            const data = await api('/api/admin/links');
+            if (!data.links) return;
+
+            document.getElementById('statsGrid').innerHTML = `
+                <div class="stat-card"><div class="stat-num">${data.stats.total_links}</div><div class="stat-label">Total Indexes</div></div>
+                <div class="stat-card"><div class="stat-num">${data.stats.total_categories}</div><div class="stat-label">Categories</div></div>
+                <div class="stat-card stat-card banned-card"><div class="stat-num">${data.stats.banned_links}</div><div class="stat-label">Banned Registry</div></div>
+            `;
+
+            const tbody = document.querySelector('#linksTable tbody');
+            tbody.innerHTML = data.links.map(link => `
+                <tr>
+                    <td style="color: var(--text-muted)">#${link.id}</td>
+                    <td><span class="title-cell">${escapeHtml(link.title)}</span></td>
+                    <td><a href="${link.url}" target="_blank" rel="noopener" style="color:var(--accent); text-decoration: none;">${escapeHtml(link.url.substring(0, 45))}...</a></td>
+                    <td><span style="background: rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 4px; font-size: 0.85rem;">${escapeHtml(link.category_name)}</span></td>
+                    <td style="color: var(--text-secondary); font-size: 0.85rem;">${formatDate(link.date_posted)}</td>
+                    <td style="font-weight: 700; color: var(--accent);">${link.views}</td>
+                    <td class="actions" style="text-align: right; justify-content: flex-end;">
+                        ${link.is_banned
+                            ? `<button class="btn-sm btn-success" onclick="unbanLink(${link.id})">Unban</button>`
+                            : `<button class="btn-sm btn-warning" onclick="banLink(${link.id})">Ban</button>`
+                        }
+                        <button class="btn-sm btn-danger" onclick="deleteLink(${link.id})">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+
+            loadCategories();
+        }
+
+        async function deleteLink(id) {
+            if (!confirm('⚠️ Permanently delete this link?')) return;
+            await api(`/api/admin/links/${id}`, { method: 'DELETE' });
+            loadDashboard();
+        }
+
+        async function banLink(id) {
+            await api(`/api/admin/links/${id}/ban`, { method: 'POST' });
+            loadDashboard();
+        }
+
+        async function unbanLink(id) {
+            await api(`/api/admin/links/${id}/unban`, { method: 'POST' });
+            loadDashboard();
+        }
+
+        async function loadCategories() {
+            const cats = await api('/api/admin/categories');
+            const list = document.getElementById('catList');
+            list.innerHTML = cats.map(c => `
+                <div class="cat-item">
+                    <div class="cat-info">
+                        <strong>${escapeHtml(c.name)}</strong>
+                        <span class="count">${c.link_count} items cached</span>
+                    </div>
+                    <button class="btn-sm btn-danger" onclick="deleteCat(${c.id}, ${c.link_count})">Remove</button>
+                </div>
+            `).join('');
+        }
+
+        async function deleteCat(id, count) {
+            if (count > 0) {
+                alert(`❌ Operation Denied: ${count} active node indexes reference this entry category location layer.`);
+                return;
+            }
+            if (!confirm('⚠️ Delete this category?')) return;
+            await api(`/api/admin/categories/${id}`, { method: 'DELETE' });
+            loadDashboard();
+        }
+
+        document.getElementById('loginBtn').addEventListener('click', async () => {
+            const username = document.getElementById('loginUser').value.trim();
+            const password = document.getElementById('loginPass').value;
+            
+            if (!username || !password) {
+                showLoginError('Please enter username and password');
+                return;
+            }
+
+            const res = await api('/api/admin/login', {
+                method: 'POST',
+                body: JSON.stringify({ username, password })
+            });
+
+            if (res.success) {
+                document.getElementById('loginError').style.display = 'none';
+                isLoggedIn = true;
+                passwordChangeRequired = res.passwordChangeRequired || false;
+                
+                if (passwordChangeRequired) {
+                    showPasswordChange();
+                } else {
+                    showAdmin();
+                    loadDashboard();
+                }
+            } else {
+                const errorMsg = res.error === 'Connection failed - is the server running?' 
+                    ? '🔌 Cannot reach server. Run: npm start' 
+                    : (res.error || 'Login failed');
+                showLoginError(errorMsg);
+            }
+        });
+
+        function showLoginError(msg) {
+            document.getElementById('loginError').textContent = msg;
+            document.getElementById('loginError').style.display = 'block';
+        }
+
+        document.getElementById('changePasswordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const passError = document.getElementById('passError');
+
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                passError.textContent = '❌ All fields are required';
+                passError.style.display = 'block';
+                return;
+            }
+            if (newPassword !== confirmPassword) {
+                passError.textContent = '❌ Passwords do not match';
+                passError.style.display = 'block';
+                return;
+            }
+
+            const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$/;
+            if (!passRegex.test(newPassword)) {
+                passError.textContent = '❌ Password complexity failed match criteria';
+                passError.style.display = 'block';
+                return;
+            }
+
+            const res = await api('/api/admin/change-password', {
+                method: 'POST',
+                body: JSON.stringify({ currentPassword, newPassword })
+            });
+
+            if (res.success) {
+                passError.style.display = 'none';
+                alert('✅ Verification recorded. Session terminated for security refreshment. Authenticate once again.');
+                await api('/api/admin/logout', { method: 'POST' });
+                isLoggedIn = false;
+                passwordChangeRequired = false;
+                showLogin();
+                document.getElementById('changePasswordForm').reset();
+            } else {
+                passError.textContent = '❌ ' + (res.error || 'Failed to change password');
+                passError.style.display = 'block';
+            }
+        });
+
+        document.getElementById('loginPass').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') document.getElementById('loginBtn').click();
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            if (confirm('Terminate secure session layer?')) {
+                await api('/api/admin/logout', { method: 'POST' });
+                isLoggedIn = false;
+                passwordChangeRequired = false;
+                showLogin();
+            }
+        });
+
+        document.querySelectorAll('.admin-sidebar a[data-tab]').forEach(a => {
+            a.addEventListener('click', (e) => {
+                e.preventDefault();
+                document.querySelectorAll('.admin-sidebar a').forEach(x => x.classList.remove('active'));
+                a.classList.add('active');
+                document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
+                document.getElementById('tab' + a.dataset.tab.charAt(0).toUpperCase() + a.dataset.tab.slice(1)).style.display = 'block';
+            });
+        });
+
+        document.getElementById('addCatBtn').addEventListener('click', async () => {
+            const name = document.getElementById('newCatName').value.trim();
+            if (!name) return;
+            const res = await api('/api/admin/categories', {
+                method: 'POST',
+                body: JSON.stringify({ name })
+            });
+            if (res.error) { alert('❌ ' + res.error); return; }
+            document.getElementById('newCatName').value = '';
+            loadDashboard();
+        });
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            const d = new Date(dateStr + 'Z');
+            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        checkAuth();
+    </script>
+</body>
+</html>

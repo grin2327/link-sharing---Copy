@@ -1,0 +1,22 @@
+{
+  "name": "link-sharing-platform",
+  "version": "1.0.0",
+  "description": "Permanent link-sharing platform with categories and admin panel",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.21.0",
+    "express-rate-limit": "^7.1.5",
+    "express-session": "^1.18.0",
+    "express-validator": "^7.0.0",
+    "helmet": "^7.1.0",
+    "sql.js": "^1.14.1",
+    "uuid": "^14.0.0"
+  }
+}
